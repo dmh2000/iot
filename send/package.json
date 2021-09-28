@@ -1,0 +1,25 @@
+{
+  "name": "simulated-device",
+  "version": "1.0.0",
+  "description": "Simulated device application in the IoT Hub quickstart device-to-cloud sample",
+  "main": "SimulatedDevice.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azure-Samples/azure-iot-samples-node.git"
+  },
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Azure-Samples/azure-iot-samples-node/issues"
+  },
+  "homepage": "https://github.com/Azure-Samples/azure-iot-samples-node#readme",
+  "dependencies": {
+    "azure-iot-device": "^1.17.6",
+    "azure-iot-device-mqtt": "^1.15.6",
+    "bufferutil": "^4.0.3",
+    "utf-8-validate": "^5.0.5"
+  }
+}
