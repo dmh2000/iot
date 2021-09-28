@@ -3,6 +3,8 @@
 
 "use strict";
 
+const os = require('os');
+
 // Get the device connection string to authenticate the device with your IoT hub.
 // Configure using the Azure CLI:
 // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
@@ -23,6 +25,7 @@ setInterval(function () {
   var temperature = 20 + Math.random() * 15;
   var message = new Message(
     JSON.stringify({
+      node: os.hostname(),
       temperature: temperature,
       humidity: 60 + Math.random() * 20,
       time: new Date().toISOString(),
@@ -46,4 +49,4 @@ setInterval(function () {
       console.log("message sent");
     }
   });
-}, 1000);
+}, 2000);
