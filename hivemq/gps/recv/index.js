@@ -9,12 +9,16 @@ const options = {
   password: process.env.HIVEMQ_PASSWORD,
 };
 
+// don't use leading / on topic
+const topic = "remote/gps";
+
 //initialize the MQTT client
 const client = mqtt.connect(options);
 
 //setup the callbacks
 client.on("connect", function () {
   console.log("Connected");
+  console.log("subscribed to", topic);
 });
 
 client.on("error", function (error) {
@@ -26,5 +30,5 @@ client.on("message", function (topic, message) {
   console.log("Received message:", topic, message.toString());
 });
 
-// subscribe to topic 'my/test/topic'
-client.subscribe("remote/gps");
+// subscribe to topic
+client.subscribe(topic);

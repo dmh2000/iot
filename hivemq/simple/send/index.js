@@ -23,6 +23,7 @@ client.on("error", function (error) {
 let count = 0;
 setInterval(() => {
   // publish message 'Hello' to topic 'my/test/topic'
+  console.log("publish ", count, " to my/test/topic");
   client.publish("my/test/topic", count.toString());
   count++;
 }, 2000);

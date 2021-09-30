@@ -1,63 +1,53 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 "use strict";
 
 const nmea = require("./nmea");
-const SerialPort = require("serialport")
-const Readline = require('@serialport/parser-readline');
-const os = require('os');
+const SerialPort = require("serialport");
+const Readline = require("@serialport/parser-readline");
+const os = require("os");
+const mqtt = require("mqtt");
 
-// Get the device connection string to authenticate the device with your IoT hub.
-// Configure using the Azure CLI:
-// az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
-const connectionString = process.env.IOT_DEVICE_CONNECTION;
+function sendHivemq(data) {
+  const options = {
+    host: process.env.HIVEMQ_HOST,
+    port: 8883,
+    protocol: "mqtts",
+    username: process.env.HIVEMQ_USERID,
+    password: process.env.HIVEMQ_PASSWORD,
+  };
 
-// Using the Node.js Device SDK for IoT Hub:
-//   https://github.com/Azure/azure-iot-sdk-node
-// The sample connects to a device-specific MQTT endpoint on your IoT Hub.
-const Mqtt = require("azure-iot-device-mqtt").Mqtt;
-const DeviceClient = require("azure-iot-device").Client;
-const Message = require("azure-iot-device").Message;
+  //initialize the MQTT client
+  const client = mqtt.connect(options);
 
-const client = DeviceClient.fromConnectionString(connectionString, Mqtt);
-
-// Create a message and send it to the IoT hub every second
-function send(gpgga)  {
-  // add hostname
-  gpgga.hostname = os.hostname();
-  const message = new Message(
-    JSON.stringify(gpgga)
-  );
-
-  message.properties.add(
-    "satellites",
-    gpgga.satellites < 4 ? "true" : "false"
-  );
-
-  console.log("Sending message: " + message.getData());
-
-  // Send the message.
-  client.sendEvent(message, function (err) {
-    if (err) {
-      console.error("send error: " + err.toString());
-    } else {
-      console.log("message sent");
-    }
+  //setup the callbacks
+  client.on("connect", function () {
+    console.log("Connected");
   });
-}
 
+  client.on("error", function (error) {
+    console.log(error);
+  });
+
+  let count = 0;
+  // don't use leading / on topic
+  const topic = "remote/gps";
+  setInterval(() => {
+    // publish message 'Hello' to topic 'my/test/topic'
+    console.log("publishing to ", topic);
+    client.publish(topic, data);
+    count++;
+  }, 2000);
+}
 
 // ================================
 // set up gps receiver handler
 // ================================
 
-// don't print errors
-nmea.setErrorHandler(function() {});
+nmea.setErrorHandler(function (e) {
+  console.log(e);
+});
 
 // creat the serial port streaming object
-const sp = new SerialPort("/dev/ttyACM0", { baudRate:9600 });
-
+const sp = new SerialPort("/dev/ttyACM0", { baudRate: 9600 });
 
 // create a readline parser
 const parser = new Readline("\r\n");
@@ -66,15 +56,14 @@ const parser = new Readline("\r\n");
 sp.pipe(parser);
 
 // wait for data
-parser.on('data',function(line) {
-  // parse the nmea sentence 
+parser.on("data", function (line) {
+  // parse the nmea sentence
   const s = nmea.parse(line);
   if (s !== null) {
     // if it was parseable, send it
     if (s.id === "GPGGA") {
       console.log(s);
-      send(s);
+      sendHivemq(s);
     }
   }
 });
-

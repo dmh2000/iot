@@ -9,10 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "azure-iot-device": "^1.17.6",
-    "azure-iot-device-mqtt": "^1.15.6",
-    "bufferutil": "^4.0.4",
-    "serialport": "^9.2.4",
-    "utf-8-validate": "^5.0.6"
+    "mqtt": "^4.2.8",
+    "serialport": "^9.2.4"
   }
 }
