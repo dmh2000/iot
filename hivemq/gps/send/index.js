@@ -6,7 +6,7 @@ const Readline = require("@serialport/parser-readline");
 const os = require("os");
 const mqtt = require("mqtt");
 
-function sendHivemq(data) {
+function connectHivemq() {
   const options = {
     host: process.env.HIVEMQ_HOST,
     port: 8883,
@@ -27,43 +27,52 @@ function sendHivemq(data) {
     console.log(error);
   });
 
-  let count = 0;
-  // don't use leading / on topic
-  const topic = "remote/gps";
-  setInterval(() => {
-    // publish message 'Hello' to topic 'my/test/topic'
-    console.log("publishing to ", topic);
-    client.publish(topic, data);
-    count++;
-  }, 2000);
+  return client;
 }
 
-// ================================
-// set up gps receiver handler
-// ================================
+function sendHivemq(client, data) {
+  // don't use leading / on topic
+  const topic = "remote/gps";
+  // publish message 'Hello' to topic 'my/test/topic'
+  console.log("publishing to ", topic);
+  client.publish(topic, data);
+}
 
-nmea.setErrorHandler(function (e) {
-  console.log(e);
-});
+function main() {
+  // ================================
+  // init mqtt connection
+  // ================================
+  const client = connectHivemq();
 
-// creat the serial port streaming object
-const sp = new SerialPort("/dev/ttyACM0", { baudRate: 9600 });
+  // ================================
+  // set up gps receiver handler
+  // ================================
 
-// create a readline parser
-const parser = new Readline("\r\n");
+  nmea.setErrorHandler(function (e) {
+    console.log(e);
+  });
 
-// pipe stream input to parser
-sp.pipe(parser);
+  // creat the serial port streaming object
+  const sp = new SerialPort("/dev/ttyACM0", { baudRate: 9600 });
 
-// wait for data
-parser.on("data", function (line) {
-  // parse the nmea sentence
-  const s = nmea.parse(line);
-  if (s !== null) {
-    // if it was parseable, send it
-    if (s.id === "GPGGA") {
-      console.log(s);
-      sendHivemq(s);
+  // create a readline parser
+  const parser = new Readline("\r\n");
+
+  // pipe stream input to parser
+  sp.pipe(parser);
+
+  // wait for data and send it
+  parser.on("data", function (line) {
+    // parse the nmea sentence
+    const s = nmea.parse(line);
+    if (s !== null) {
+      // if it was parseable, send it
+      if (s.id === "GPGGA") {
+        console.log(s);
+        sendHivemq(client, s);
+      }
     }
-  }
-});
+  });
+}
+
+main();
