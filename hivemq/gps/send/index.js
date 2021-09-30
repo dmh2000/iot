@@ -24,7 +24,7 @@ function connectHivemq() {
   });
 
   client.on("error", function (error) {
-    console.log(error);
+    console.log("MQTT",error);
   });
 
   return client;
@@ -48,8 +48,10 @@ function main() {
   // set up gps receiver handler
   // ================================
 
-  nmea.setErrorHandler(function (e) {
-    console.log(e);
+  nmea.setErrorHandler(function (code,msg) {
+    if (code != 1) {
+      console.log("NMEA",code, msg);
+    }
   });
 
   // creat the serial port streaming object
@@ -68,8 +70,8 @@ function main() {
     if (s !== null) {
       // if it was parseable, send it
       if (s.id === "GPGGA") {
-        console.log(s);
-        sendHivemq(client, s);
+        console.log(s.time);
+        sendHivemq(client, JSON.stringify(s));
       }
     }
   });

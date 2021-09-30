@@ -40,7 +40,6 @@ const NMEA = (function () {
   nmea.ERROR_INVALID_ENCODER = 4;
   nmea.ERROR_NOT_A_STRING = 5;
   nmea.ERROR_MISSING_HEADER = 6;
-  nmea.ERROR_ID_NOT_FOUND = 7;
   // =============================================
   // public API functions
   // =============================================
@@ -660,11 +659,12 @@ const NMEA = (function () {
     let result;
     let checksum;
     let status;
+
     if (typeof sentence !== "string") {
       this.error(this.ERROR_NOT_A_STRING, "null");
       return null;
     }
-
+    
     // find the checksum and remove it prior to tokenizing
     checksum = sentence.split("*");
     if (checksum.length === 2) {
