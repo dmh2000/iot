@@ -27,7 +27,8 @@ client.on("error", function (error) {
 
 client.on("message", function (topic, message) {
   //Called each time a message is received
-  console.log("Received message:", topic, message.toString());
+  const gpgga = JSON.parse(message);
+  console.log(topic, gpgga);
 });
 
 // subscribe to topic
